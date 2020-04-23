@@ -1,5 +1,7 @@
 import React from 'react';
 import {View, FlatList, Image, Text} from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
+
 import Styles from './styles';
 
 export default class Home extends React.PureComponent {
@@ -10,11 +12,36 @@ export default class Home extends React.PureComponent {
     };
   }
   componentDidMount() {
-    console.log('Lets fetch data herer ');
     if (this.state.songs.length == 0) {
-      this.fetchSongs();
+      this.getAsyncSongs();
     }
   }
+
+  getAsyncSongs = async () => {
+    try {
+      const value = await AsyncStorage.getItem('@Itune_Songs');
+      if (value !== null) {
+        let songs = JSON.parse(value);
+        this.setState({songs});
+        // value previously stored
+      } else {
+        this.fetchSongs();
+      }
+    } catch (e) {
+      console.log('Catch error while reading data is', e);
+      // error reading value
+    }
+  };
+
+  storeData = async songs => {
+    try {
+      let songsString = JSON.stringify(songs);
+      await AsyncStorage.setItem('@Itune_Songs', songsString);
+    } catch (e) {
+      console.log('Catch error while storing data is', e);
+      // saving error
+    }
+  };
 
   fetchSongs() {
     try {
@@ -30,9 +57,9 @@ export default class Home extends React.PureComponent {
             responseJson.feed.results &&
             responseJson.feed.results.length > 0
           ) {
+            this.storeData(responseJson.feed.results);
             this.setState({songs: responseJson.feed.results});
           }
-          console.log('response of fetch is ', responseJson);
         })
         .catch(err => {
           console.log('Error while fetching data is ', err);
