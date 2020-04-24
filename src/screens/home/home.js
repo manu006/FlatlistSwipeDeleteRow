@@ -1,7 +1,8 @@
 import React from 'react';
-import {View, FlatList, Image, Text} from 'react-native';
+import {View, FlatList, Text} from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 
+import {SlideRow} from '../../component';
 import Styles from './styles';
 
 export default class Home extends React.PureComponent {
@@ -10,7 +11,9 @@ export default class Home extends React.PureComponent {
     this.state = {
       songs: [],
     };
+    this.removeCell = this.removeCell.bind(this);
   }
+
   componentDidMount() {
     if (this.state.songs.length == 0) {
       this.getAsyncSongs();
@@ -32,6 +35,15 @@ export default class Home extends React.PureComponent {
       // error reading value
     }
   };
+
+  removeCell(index) {
+    let {songs} = this.state;
+    songs.splice(index, 1);
+    let newSongs = [].concat(songs);
+    this.setState({songs: newSongs}, () => {
+      this.storeData(newSongs);
+    });
+  }
 
   storeData = async songs => {
     try {
@@ -83,27 +95,7 @@ export default class Home extends React.PureComponent {
       }
     });
     return (
-      <View>
-        <View style={Styles.songCard}>
-          <Text style={Styles.indexText}>{item.index + 1}</Text>
-          <Image
-            source={{uri: item.item.artworkUrl100}}
-            style={Styles.songImage}
-          />
-          <View style={Styles.songInfoView}>
-            <Text style={Styles.songName} numberOfLines={1}>
-              {item.item.name}
-            </Text>
-            <Text style={Styles.songArtist} numberOfLines={1}>
-              {item.item.artistName}
-            </Text>
-            <Text style={Styles.songGenere} numberOfLines={1}>
-              {generies}
-            </Text>
-          </View>
-        </View>
-        {this.renderSeperator()}
-      </View>
+      <SlideRow item={item} generies={generies} removeCell={this.removeCell} />
     );
   };
 

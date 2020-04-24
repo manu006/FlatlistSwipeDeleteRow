@@ -1,3 +1,3 @@
-import SwipeView from './swipeView/swipeView';
+import SlideRow from './slideRow/slideRow';
 
-export {SwipeView};
+export {SlideRow};
